@@ -9,23 +9,18 @@
 from HMM import unsupervised_HMM
 from Utility import Utility
 
-def unsupervised_learning(n_states, N_iters):
+def unsupervised_learning(X, n_states, N_iters):
     '''
     Trains an HMM using supervised learning on the file 'ron.txt' and
     prints the results.
 
     Arguments:
         n_states:   Number of hidden states that the HMM should have.
+        X: sequence list = [[s0], [s1], [s2], ...]
     '''
-    # genres, genre_map = Utility.load_ron_hidden()
-
-    # sentence_list = [[s0], [s1], [s2],...]
-    # word_map {"Thee" : 0, ...}
-    # FIX: load_function needs to be implemented
-    sentence_list, word_map = load_function()
 
     # Train the HMM.
-    HMM = unsupervised_HMM(sentence_list, n_states, N_iters)
+    HMM = unsupervised_HMM(X, n_states, N_iters)
 
     # Print the transition matrix.
     print("Transition Matrix:")
@@ -43,13 +38,28 @@ def unsupervised_learning(n_states, N_iters):
     print('')
     print('')
 
+    return HMM
+
+# make shakespeare sentence
+def generate_shakespeare(HMM, N_sentences, sentence_length):
+    sentences = []
+    for i in range(N_sentences):
+        sentence, state = HMM.generate_emission(sentence_length)
+        sentences.append(sentence)
+
+    return sentences
+
 if __name__ == '__main__':
     print('')
     print('')
     print('#' * 70)
-    print("{:^70}".format("Running Code For "))
+    print("{:^70}".format("Running Code For Project 3 HMM"))
     print('#' * 70)
     print('')
     print('')
 
-    unsupervised_learning(4, 1000)
+    sentence_list, word_lst = Utility.text_to_sequences2('./data/shakespeare.txt')
+
+    hmm_model = unsupervised_learning(sentence_list, 4, 10)
+
+    sentences = generate_shakespeare(hmm_model, 14, 10)
