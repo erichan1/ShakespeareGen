@@ -126,6 +126,16 @@ class Utility:
 
         return genres, genre_map
 
+    # from the syllable dictionary file make syllable dict
+    @staticmethod
+    def make_syllable_dict():
+        syllable_dict = {}
+        file = open('./data/Syllable_dictionary.txt')
+        for line in file:
+            split_line = line.split()
+            syllable_dict[split_line[0]] = split_line[1:]
+        return syllable_dict
+
     # fname = './data/shakespeare.txt'
     @staticmethod
     def text_to_sequences2(fname):
@@ -145,6 +155,8 @@ class Utility:
             for j, word in enumerate(line):
                 # bad bc I repeat code 
                 has_punctuation = False     # this is bc I want to deal with word first
+                # lowercase the word
+                word = word.lower()
                 if word[-1] in punctuations:
                     p = word[-1]        # punctuation at end
                     word = word[:-1]    

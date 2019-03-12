@@ -120,6 +120,4 @@ def flatten(lst_lsts):
 if __name__ == '__main__':
 	sentences, word_lst = filetest('./data/shakespeare.txt')
 	flat_sentences = flatten(sentences)
-	print(max(flat_sentences))
-	print(len(word_lst))
 
