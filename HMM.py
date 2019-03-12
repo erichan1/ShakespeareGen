@@ -398,6 +398,7 @@ class HiddenMarkovModel:
             O_numerator = np.zeros((self.L, self.D))
             O_denominator = np.zeros((self.L, self.D))
             for seq_i, seq in enumerate(X):
+                print("Sequence {} of {} in iteration {} of {}".format(seq_i, len(X), iteration, N_iters))
                 M = len(seq)
                 alphas = np.array(self.forward(seq, normalize=True))
                 betas = np.array(self.backward(seq, normalize=True))
@@ -516,10 +517,11 @@ class HiddenMarkovModel:
     # basically just regenerates the word until you get right number of syllables. 
     # also generates backwards
     def generate_emission_syllables(self, N_syllables, y_start, syllable_dict):
-    '''
+        '''
         N_syllables = int = number of syllables you want
         y_start = int = starting y position in markov chain
-    '''
+        syllable_dict = {}
+        '''
         emission = []
         states = []
         np_A = np.array(self.A)
