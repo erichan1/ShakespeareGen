@@ -486,84 +486,72 @@ class HiddenMarkovModel:
 
         return emission, states
 
-    # generates an emission of length M, given a starting position in the markov chain.
-    def generate_emission_backwards(self, M, y_start):
-        emission = []
-        states = []
-        np_A = np.array(self.A)
-        np_O = np.array(self.O)
+    
 
-        # start
-        p = random.uniform(0, 1)
-        y = y_start
-        states.append(y)
-        p = random.uniform(0, 1)
-        x = self.choose_index_wprob(p, np_O[y])
-        emission.append(x)
-
-        for i in range(1, M):
-            p = random.uniform(0, 1)
-            y = self.choose_index_wprob(p, np_A[:,y])
-            states.append(y)
-            p = random.uniform(0, 1)
-            x = self.choose_index_wprob(p, np_O[:,y])
-            emission.append(x)
-
-        # emission and states are reversed. reverse them to get it right
-        list.reverse(emission)
-        list.reverse(states)
-        return emission, states
 
     # generates an emission with number of syllables restricted
     # basically just regenerates the word until you get right number of syllables. 
     # also generates backwards
-    def generate_emission_syllables(self, N_syllables, y_start, word_lst, syllable_dict):
+    def generate_emission_syllables(self, N_syllables, rhyme_word, word_lst, syllable_dict):
         '''
         N_syllables = int = number of syllables you want
         y_start = int = starting y position in markov chain
         syllable_dict = {}
         '''
-        emission = ''
-        states = []
+
         np_A = np.array(self.A)
         np_O = np.array(self.O)
         syllablecount = 0
+        emission = ''
 
-        # start
-        p = random.uniform(0, 1)
-        y = y_start
-        states.append(y)
-        p = random.uniform(0, 1)
-        x = self.choose_index_wprob(p, np_O[y])
-        word = word_lst[x]
-        syllablecount += syllable_dict[word][-1]
-        emission += word_lst[x]
-
-        while(syllablecount <= 10):
+        # makes one emission. generates repeatedly if goes above syllable count.
+        # returns (string word, boolean is_alpha, int num_syllables)
+        def one_emission(y_state):
             p = random.uniform(0, 1)
-            y = self.choose_index_wprob(p, np_A[:,y])
-            states.append(y)
-            p = random.uniform(0, 1)
+            x = self.choose_index_wprob(p, np_O[y])
+            word = word_lst[x]
+            if(word.isalpha()):
+                syllable_info = syllable_dict[word]
+                return (word, True, syllable_info[0])
+            else:
+                return (word, False, 0)
 
+        # add on the last word. do cases where it's punctuation and when it's ending
+        last_word_syllables = syllable_dict[rhyme_word]
+        # if last word has diff syllables, then deal w it
+        if(last_word_syllables[1] != 0):
+            syllablecount += int(last_word_syllables[1])
+        else:
+            syllablecount += int(last_word_syllables[0])
+        emission += rhyme_word
+
+        p = random.uniform(0, 1)
+        y = self.choose_index_wprob(p, self.A_start)
+
+        while(syllablecount < N_syllables):
             # keep getting words 
             while(True):
-                x = self.choose_index_wprob(p, np_O[:,y])
-                word = word_lst[x]
-                if word.isalpha():
-                    this_syllables = syllable_dict[word]
-                    if(this_syllables + syllablecount < N_syllables):
-                        emission += word
-                        emission += ' '
-                        syllablecount += this_syllables
+                word, is_alpha, num_syllables = one_emission(y)
+
+                if(is_alpha or len(word) > 1):
+                    if(num_syllables + syllablecount <= N_syllables):
+                        emission = emission + ' ' + word
+                        syllablecount += num_syllables
                         break
                 else:
-                    emission += word
+                    emission = emission + word
                     break
 
+            p = random.uniform(0, 1)
+            y = self.choose_index_wprob(p, np_A[:,y])
+
         # emission and states are reversed. reverse them to get it right
-        list.reverse(emission)
-        list.reverse(states)
-        return emission, states
+        emission_lst = emission.split()
+        list.reverse(emission_lst)
+        emission = ''
+        for word in emission_lst:
+            emission += word + ' '
+        return emission
 
 
 
@@ -694,7 +682,6 @@ def unsupervised_HMM(X, n_states, N_iters):
     # Compute L and D.
     L = n_states
     D = len(observations)
-    random.seed(2019)
     # Randomly initialize and normalize matrix A.
     A = [[random.random() for i in range(L)] for j in range(L)]
 

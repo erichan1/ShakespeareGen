@@ -45,7 +45,7 @@ def unsupervised_learning(X, n_states, N_iters, ):
 
 def seq_to_sentence(seq, word_lst, syllable_dict):
     sentence = ''
-    punctuation = [',','.','?','!',':',';']
+    punctuation = [',','.','?','!',':',';','(',')']
     for num in seq: 
         word = str(word_lst[num])
         if word.isalpha():
@@ -77,11 +77,15 @@ if __name__ == '__main__':
 
     syllable_dict = Utility.make_syllable_dict()
 
-    hmm_model = unsupervised_learning(sentence_list, 4, 10)
+    hmm_model = unsupervised_learning(sentence_list, 5, 200)
 
     # sentences = generate_shakespeare(hmm_model, 14, 10, word_lst, syllable_dict)
 
     # print(sentences)
-
-    randomword = np.random.choice(word_lst)
-    sentence = hmm_model.generate_emission_syllables(10, randomword, word_lst, syllable_dict)
+    N_poems = 10
+    for j in range(N_poems):
+        print("Poem ", j)
+        for i in range(14):
+            randomword = np.random.choice(word_lst)
+            sentence = hmm_model.generate_emission_syllables(10, randomword, word_lst, syllable_dict)
+            print(sentence)

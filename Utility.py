@@ -127,13 +127,22 @@ class Utility:
         return genres, genre_map
 
     # from the syllable dictionary file make syllable dict
+    # each word has [normal ,ending]
     @staticmethod
     def make_syllable_dict():
         syllable_dict = {}
         file = open('./data/Syllable_dictionary.txt')
         for line in file:
             split_line = line.split()
-            syllable_dict[split_line[0]] = split_line[1:]
+            syllables = [0, 0]
+            for count in split_line[1:]:
+                if(count[0] == 'E'):
+                    syllables[1] = int(count[1])
+                else:
+                    syllables[0] = int(count)
+                if(len(syllables) == 2):
+                    break
+            syllable_dict[split_line[0]] = syllables
         return syllable_dict
 
     # fname = './data/shakespeare.txt'
@@ -148,7 +157,7 @@ class Utility:
 
         word_lst = []       # word_lst = unique words
         seq_lst = []        # line_lst -> seq_lst after number conversion
-        punctuations = [',','.','?','!',':',';']
+        punctuations = [',','.','?','!',':',';','(',')']
         counter = 0
         for i, line in enumerate(line_lst):
             seq_lst.append([])
