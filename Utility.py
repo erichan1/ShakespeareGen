@@ -146,15 +146,19 @@ class Utility:
         return syllable_dict
 
     # fname = './data/shakespeare.txt'
+    # takes a list of filenames [file1, file2, ...]
     @staticmethod
-    def text_to_sequences2(fname):
+    def text_to_sequences2(fnames):
+        # import all lines w more than 1 word
         line_lst = []
-        file = open(fname)
-        for line in file:
-            split_line = line.split()
-            if(len(split_line) > 1):
-                line_lst.append(line.split())
+        for fname in fnames:
+            file = open(fname)
+            for line in file:
+                split_line = line.split()
+                if(len(split_line) > 1):
+                    line_lst.append(line.split())
 
+        # get unique words.
         word_lst = []       # word_lst = unique words
         seq_lst = []        # line_lst -> seq_lst after number conversion
         punctuations = [',','.','?','!',':',';','(',')']
@@ -186,6 +190,56 @@ class Utility:
                         word_lst.append(p)
                         counter += 1
         return (seq_lst, word_lst)
+
+    def get_rhyme_pairs(seq_lst, word_lst):
+        poem = list(range(0,12))
+        poem_end = list(range(12,14))
+        total_lines = len(seq_lst)
+
+        rhyme_pairs = []
+        n = 0
+        while n <= total_lines:
+            n+=14
+            end_words = []
+            for lst_index in poem:
+                if word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]].isalpha():
+                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]]
+                    end_words.append(end_word)
+                else:
+                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-2]]
+                    end_words.append(end_word)
+            rhyme_pair1 = [end_words[0],end_words[2]]
+            rhyme_pair2 = [end_words[1],end_words[3]]
+            rhyme_pair3 = [end_words[4],end_words[6]]
+            rhyme_pair4 = [end_words[5],end_words[7]]
+            rhyme_pair5 = [end_words[8],end_words[10]]
+            rhyme_pair6 = [end_words[9],end_words[11]]
+            rhyme_pairs.append(rhyme_pair1)
+            rhyme_pairs.append(rhyme_pair2)
+            rhyme_pairs.append(rhyme_pair3)
+            rhyme_pairs.append(rhyme_pair4)
+            rhyme_pairs.append(rhyme_pair5)
+            rhyme_pairs.append(rhyme_pair6)
+        
+            poem = [x+14 for x in poem]
+        
+            if poem_end[1] == 2155:
+                break
+       
+            for lst_index in poem_end:
+                if word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]].isalpha():
+                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]]
+                    end_words.append(end_word)
+                else:
+                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-2]]
+                    end_words.append(end_word)
+            rhyme_pair7 = [end_words[12],end_words[13]]
+            rhyme_pairs.append(rhyme_pair7)
+        
+            poem_end = [x+14 for x in poem_end]
+        return rhyme_pairs
+        
+    
 
     # fname = './data/shakespeare.txt'
     @staticmethod

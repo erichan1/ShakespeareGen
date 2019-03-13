@@ -504,6 +504,30 @@ class HiddenMarkovModel:
         syllablecount = 0
         emission = ''
 
+        def syllable_count(word):
+            if(not word.isalpha() and len(word) == 1):
+                return 0
+            word = word.lower()
+            count = 0
+            vowels = "aeiouy"
+            if word[0] in vowels:
+                count += 1
+            for index in range(1, len(word)):
+                if word[index] in vowels and word[index - 1] not in vowels:
+                    count += 1
+            if word.endswith("e"):
+                count -= 1
+            if count == 0:
+                count += 1
+            return count
+
+        # either outputs something from syllable_count or from syllable_dict
+        def get_syllables(word, syllable_dict):
+            if(word in syllable_dict):
+                return syllable_dict[word]
+            else:
+                return (syllable_count(word), 0)
+
         # makes one emission. generates repeatedly if goes above syllable count.
         # returns (string word, boolean is_alpha, int num_syllables)
         def one_emission(y_state):
@@ -511,13 +535,15 @@ class HiddenMarkovModel:
             x = self.choose_index_wprob(p, np_O[y])
             word = word_lst[x]
             if(word.isalpha()):
-                syllable_info = syllable_dict[word]
+                syllable_info = get_syllables(word, syllable_dict)
                 return (word, True, syllable_info[0])
             else:
                 return (word, False, 0)
 
+        
+
         # add on the last word. do cases where it's punctuation and when it's ending
-        last_word_syllables = syllable_dict[rhyme_word]
+        last_word_syllables = get_syllables(rhyme_word, syllable_dict)
         # if last word has diff syllables, then deal w it
         if(last_word_syllables[1] != 0):
             syllablecount += int(last_word_syllables[1])
@@ -528,18 +554,21 @@ class HiddenMarkovModel:
         p = random.uniform(0, 1)
         y = self.choose_index_wprob(p, self.A_start)
 
+        last_is_punc = False # state to track if last word was punctuation
         while(syllablecount < N_syllables):
             # keep getting words 
+            
             while(True):
                 word, is_alpha, num_syllables = one_emission(y)
-
                 if(is_alpha or len(word) > 1):
                     if(num_syllables + syllablecount <= N_syllables):
                         emission = emission + ' ' + word
                         syllablecount += num_syllables
+                        last_is_punc = False    
                         break
-                else:
+                elif(not last_is_punc):
                     emission = emission + word
+                    last_is_punc = True
                     break
 
             p = random.uniform(0, 1)
