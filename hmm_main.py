@@ -54,8 +54,40 @@ def seq_to_sentence(seq, word_lst, syllable_dict):
         
     return sentence
 
-# make shakespeare sentence
-def generate_shakespeare(HMM, N_sentences, sentence_length, word_lst, syllable_dict):
+# make shakespeare sonnets
+def generate_shakespeare(HMM, rhyme_pairs, word_lst, syllable_dict):
+    poem = ''
+
+    rhymepairs = []
+    for i in range(7):
+        index = np.random.randint(0, len(rhyme_pairs))
+        rhymepairs.append(rhyme_pairs[index])
+
+    line1 = hmm_model.generate_emission_syllables(10, rhymepairs[0][0], word_lst, syllable_dict)
+    line3 = hmm_model.generate_emission_syllables(10, rhymepairs[0][1], word_lst, syllable_dict)
+    line2 = hmm_model.generate_emission_syllables(10, rhymepairs[1][0], word_lst, syllable_dict)
+    line4 = hmm_model.generate_emission_syllables(10, rhymepairs[1][1], word_lst, syllable_dict)
+
+    line5 = hmm_model.generate_emission_syllables(10, rhymepairs[2][0], word_lst, syllable_dict)
+    line7 = hmm_model.generate_emission_syllables(10, rhymepairs[2][1], word_lst, syllable_dict)
+    line6 = hmm_model.generate_emission_syllables(10, rhymepairs[3][0], word_lst, syllable_dict)
+    line8 = hmm_model.generate_emission_syllables(10, rhymepairs[3][1], word_lst, syllable_dict)
+
+    line9 = hmm_model.generate_emission_syllables(10, rhymepairs[4][0], word_lst, syllable_dict)
+    line11 = hmm_model.generate_emission_syllables(10, rhymepairs[4][1], word_lst, syllable_dict)
+    line10 =  hmm_model.generate_emission_syllables(10, rhymepairs[5][0], word_lst, syllable_dict)
+    line12 = hmm_model.generate_emission_syllables(10, rhymepairs[5][1], word_lst, syllable_dict)
+
+    line13 = hmm_model.generate_emission_syllables(10, rhymepairs[6][0], word_lst, syllable_dict)
+    line14 = hmm_model.generate_emission_syllables(10, rhymepairs[6][1], word_lst, syllable_dict)
+
+    poem += (line1 + '\n' + line2 + '\n' + line3 + '\n' + line4 + 
+        '\n' + line5 + '\n' + line6 + '\n' + line7 + '\n' + line8 + '\n' + line9 + '\n'
+        + line10 + '\n' + line11 + '\n' + line12 + '\n' + line13 + '\n' + line14 + '\n') 
+
+    return poem
+
+
     sentences = ''
     for i in range(N_sentences):
         seq, state = HMM.generate_emission(sentence_length)
@@ -63,6 +95,46 @@ def generate_shakespeare(HMM, N_sentences, sentence_length, word_lst, syllable_d
         sentences += sentence + '\n'
 
     return sentences
+
+# make shakespeare sonnets
+def generate_haiku(HMM, rhyme_pairs, word_lst, syllable_dict):
+    poem = ''
+
+    rhymepairs = []
+    for i in range(3):
+        index = np.random.randint(0, len(rhyme_pairs))
+        rhymepairs.append(rhyme_pairs[index])
+
+    line1 = hmm_model.generate_emission_syllables(5, rhymepairs[0][0], word_lst, syllable_dict)
+    line2 = hmm_model.generate_emission_syllables(7, rhymepairs[1][0], word_lst, syllable_dict)
+    line3 = hmm_model.generate_emission_syllables(5, rhymepairs[2][0], word_lst, syllable_dict)
+
+    poem += (line1 + '\n' + line2 + '\n' + line3 + '\n') 
+
+    return poem
+
+
+    sentences = ''
+    for i in range(N_sentences):
+        seq, state = HMM.generate_emission(sentence_length)
+        sentence = seq_to_sentence(seq, word_lst, syllable_dict)
+        sentences += sentence + '\n'
+
+    return sentences
+
+# gets the top ten words for each state 
+def getTopTenWords(hmm_model, word_lst):
+    np_O = np.array(hmm_model.O)
+    topten_lst = []
+    # for each state, find ten best
+    for i in range(len(np_O)):
+        state_lst = np_O[i]
+        this_state_topten_nums = np.argpartition(state_lst, -10)[-10:]   # still numbers at this point
+        this_state_topten_words = [word_lst[num] for num in this_state_topten_nums]# convert numbers into words
+        topten_lst.append(this_state_topten_words)
+
+    return np.array(topten_lst)
+
 
 if __name__ == '__main__':
     print('')
@@ -73,19 +145,41 @@ if __name__ == '__main__':
     print('')
     print('')
 
-    sentence_list, word_lst = Utility.text_to_sequences2('./data/shakespeare.txt')
-
+    shakespeare_seqlst, shakespeare_wordlst = Utility.text_to_sequences2(['./data/shakespeare.txt'])
+    rhyme_pairs = Utility.get_rhyme_pairs(shakespeare_seqlst, shakespeare_wordlst)
     syllable_dict = Utility.make_syllable_dict()
+    hmm_model = unsupervised_learning(shakespeare_seqlst, 5, 10)
+    # save the A and O
+    np.savetxt('./data/A_matrix.txt', hmm_model.A)
+    np.savetxt('./data/O_matrix.txt', hmm_model.O)
+    topten_list = getTopTenWords(hmm_model, shakespeare_wordlst)
+    print(topten_list[0])
+    np.savetxt('./data/topten_list.txt', topten_list, fmt="%s")
 
-    hmm_model = unsupervised_learning(sentence_list, 5, 200)
+    # # Make Only shakespeare sonnets
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Shakespeare Sonnet ", j)
+    #     poem = generate_shakespeare(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
+    #     print(poem)
 
-    # sentences = generate_shakespeare(hmm_model, 14, 10, word_lst, syllable_dict)
+    # # Make haikus
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Haiku ", j)
+    #     poem = generate_haiku(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
+    #     print(poem)
 
-    # print(sentences)
-    N_poems = 10
-    for j in range(N_poems):
-        print("Poem ", j)
-        for i in range(14):
-            randomword = np.random.choice(word_lst)
-            sentence = hmm_model.generate_emission_syllables(10, randomword, word_lst, syllable_dict)
-            print(sentence)
+    # # Train a model with both spenser and shakespeare
+    # shake_spenser_seqlst, shake_spenser_wordlst = Utility.text_to_sequences2(['./data/shakespeare.txt', './data/spenser.txt'])
+    # rhyme_pairs = Utility.get_rhyme_pairs(shake_spenser_seqlst, shake_spenser_wordlst)
+    # syllable_dict = Utility.make_syllable_dict()
+    # hmm_model = unsupervised_learning(shake_spenser_seqlst, 7, 1000)
+    # # make the shakespeare_spenser sonnets
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Shakespeare Sonnet ", j)
+    #     poem = generate_shakespeare(hmm_model, rhyme_pairs, shake_spenser_wordlst, syllable_dict)
+    #     print(poem)
+
+
