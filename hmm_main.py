@@ -122,6 +122,20 @@ def generate_haiku(HMM, rhyme_pairs, word_lst, syllable_dict):
 
     return sentences
 
+# gets the top ten words for each state 
+def getTopTenWords(hmm_model, word_lst):
+    np_O = np.array(hmm_model.O)
+    topten_lst = []
+    # for each state, find ten best
+    for i in range(len(np_O)):
+        state_lst = np_O[i]
+        this_state_topten_nums = np.argpartition(state_lst, -10)[-10:]   # still numbers at this point
+        this_state_topten_words = [word_lst[num] for num in this_state_topten_nums]# convert numbers into words
+        topten_lst.append(this_state_topten_words)
+
+    return np.array(topten_lst)
+
+
 if __name__ == '__main__':
     print('')
     print('')
@@ -134,35 +148,38 @@ if __name__ == '__main__':
     shakespeare_seqlst, shakespeare_wordlst = Utility.text_to_sequences2(['./data/shakespeare.txt'])
     rhyme_pairs = Utility.get_rhyme_pairs(shakespeare_seqlst, shakespeare_wordlst)
     syllable_dict = Utility.make_syllable_dict()
-    hmm_model = unsupervised_learning(shakespeare_seqlst, 6, 20)
+    hmm_model = unsupervised_learning(shakespeare_seqlst, 5, 10)
     # save the A and O
-    # np.savetxt('./data/A_matrix.txt', hmm_model.A)
-    # np.savetxt('./data/O_matrix.txt', hmm_model.O)
+    np.savetxt('./data/A_matrix.txt', hmm_model.A)
+    np.savetxt('./data/O_matrix.txt', hmm_model.O)
+    topten_list = getTopTenWords(hmm_model, shakespeare_wordlst)
+    print(topten_list[0])
+    np.savetxt('./data/topten_list.txt', topten_list, fmt="%s")
 
-    # Make Only shakespeare sonnets
-    N_poems = 3
-    for j in range(N_poems):
-        print("Shakespeare Sonnet ", j)
-        poem = generate_shakespeare(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
-        print(poem)
+    # # Make Only shakespeare sonnets
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Shakespeare Sonnet ", j)
+    #     poem = generate_shakespeare(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
+    #     print(poem)
 
-    # Make haikus
-    N_poems = 3
-    for j in range(N_poems):
-        print("Haiku ", j)
-        poem = generate_haiku(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
-        print(poem)
+    # # Make haikus
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Haiku ", j)
+    #     poem = generate_haiku(hmm_model, rhyme_pairs, shakespeare_wordlst, syllable_dict)
+    #     print(poem)
 
-    # Train a model with both spenser and shakespeare
-    shake_spenser_seqlst, shake_spenser_wordlst = Utility.text_to_sequences2(['./data/shakespeare.txt', './data/spenser.txt'])
-    rhyme_pairs = Utility.get_rhyme_pairs(shake_spenser_seqlst, shake_spenser_wordlst)
-    syllable_dict = Utility.make_syllable_dict()
-    hmm_model = unsupervised_learning(shake_spenser_seqlst, 6, 20)
-    # make the shakespeare_spenser sonnets
-    N_poems = 3
-    for j in range(N_poems):
-        print("Shakespeare Sonnet ", j)
-        poem = generate_shakespeare(hmm_model, rhyme_pairs, shake_spenser_wordlst, syllable_dict)
-        print(poem)
+    # # Train a model with both spenser and shakespeare
+    # shake_spenser_seqlst, shake_spenser_wordlst = Utility.text_to_sequences2(['./data/shakespeare.txt', './data/spenser.txt'])
+    # rhyme_pairs = Utility.get_rhyme_pairs(shake_spenser_seqlst, shake_spenser_wordlst)
+    # syllable_dict = Utility.make_syllable_dict()
+    # hmm_model = unsupervised_learning(shake_spenser_seqlst, 7, 1000)
+    # # make the shakespeare_spenser sonnets
+    # N_poems = 3
+    # for j in range(N_poems):
+    #     print("Shakespeare Sonnet ", j)
+    #     poem = generate_shakespeare(hmm_model, rhyme_pairs, shake_spenser_wordlst, syllable_dict)
+    #     print(poem)
 
 

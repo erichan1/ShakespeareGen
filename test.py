@@ -1,5 +1,17 @@
 import numpy as np
 
+# gets the top ten words for each state 
+def getTopTenWords(lst):
+    topten_nums = np.partition(lst, -10)[-10:]   # still numbers at this point
+    return np.array(topten_nums)
+
+def getTopN(lst, N):
+	topN_nums = np.array(lst[0:N])
+	for i in range(N, len(lst)):
+		min_j = np.argmin(topN_nums)
+		if(lst[i] > topN_nums[min_j]):
+			topN_nums[min_j] = lst[i]
+	return topN_nums
 
 def filetest(fname):
 	line_lst = []
@@ -118,6 +130,10 @@ def flatten(lst_lsts):
 	return new_lst
 
 if __name__ == '__main__':
-	sentences, word_lst = filetest('./data/shakespeare.txt')
-	flat_sentences = flatten(sentences)
+	lst = [np.random.randint(0, 10000) for i in range(1000)]
+	topten = getTopTenWords(lst)
+	topN = getTopN(lst, 10)
+	print(np.array_equal(np.sort(topN), np.sort(topten)))
+
+	
 

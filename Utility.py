@@ -191,52 +191,42 @@ class Utility:
                         counter += 1
         return (seq_lst, word_lst)
 
+    # get rhyme pairs specifically for shakespeare
     def get_rhyme_pairs(seq_lst, word_lst):
-        poem = list(range(0,12))
+        if(len(seq_lst) % 14 != 0):
+            print("Exception! Poem not composed of all 14 line quatrains!")
         poem_end = list(range(12,14))
         total_lines = len(seq_lst)
 
         rhyme_pairs = []
         n = 0
-        while n <= total_lines:
-            n+=14
+        while n < total_lines:
+            
             end_words = []
-            for lst_index in poem:
-                if word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]].isalpha():
-                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]]
-                    end_words.append(end_word)
+            for i in range(14):
+                last_word = word_lst[seq_lst[n + i][-1]]    # for each seq, get the last word
+                if last_word.isalpha():
+                    end_words.append(last_word) 
                 else:
-                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-2]]
-                    end_words.append(end_word)
+                    second_to_last_word = word_lst[seq_lst[n + i][-2]]
+                    end_words.append(second_to_last_word)
+            n += 14
+
             rhyme_pair1 = [end_words[0],end_words[2]]
             rhyme_pair2 = [end_words[1],end_words[3]]
             rhyme_pair3 = [end_words[4],end_words[6]]
             rhyme_pair4 = [end_words[5],end_words[7]]
             rhyme_pair5 = [end_words[8],end_words[10]]
             rhyme_pair6 = [end_words[9],end_words[11]]
+            rhyme_pair7 = [end_words[12],end_words[13]]
             rhyme_pairs.append(rhyme_pair1)
             rhyme_pairs.append(rhyme_pair2)
             rhyme_pairs.append(rhyme_pair3)
             rhyme_pairs.append(rhyme_pair4)
             rhyme_pairs.append(rhyme_pair5)
             rhyme_pairs.append(rhyme_pair6)
-        
-            poem = [x+14 for x in poem]
-        
-            if poem_end[1] == 2155:
-                break
-       
-            for lst_index in poem_end:
-                if word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]].isalpha():
-                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-1]]
-                    end_words.append(end_word)
-                else:
-                    end_word = word_lst[seq_lst[lst_index][len(seq_lst[lst_index])-2]]
-                    end_words.append(end_word)
-            rhyme_pair7 = [end_words[12],end_words[13]]
             rhyme_pairs.append(rhyme_pair7)
-        
-            poem_end = [x+14 for x in poem_end]
+            
         return rhyme_pairs
         
     

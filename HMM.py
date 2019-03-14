@@ -505,7 +505,7 @@ class HiddenMarkovModel:
         emission = ''
 
         def syllable_count(word):
-            if(not word.isalpha() and len(word) == 1):
+            if(not word[-1].isalpha()):
                 return 0
             word = word.lower()
             count = 0
@@ -534,7 +534,7 @@ class HiddenMarkovModel:
             p = random.uniform(0, 1)
             x = self.choose_index_wprob(p, np_O[y])
             word = word_lst[x]
-            if(word.isalpha()):
+            if(word[-1].isalpha()):
                 syllable_info = get_syllables(word, syllable_dict)
                 return (word, True, syllable_info[0])
             else:

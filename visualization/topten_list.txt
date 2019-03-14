@@ -1,0 +1,7 @@
+Each list is top ten words of a state. 
+
+0 [['from' 'all' 'for' 'of' 'with' 'in' 'to' 'thou' 'doth' 'the']
+1  ['then' 'as' 'or' 'if' 'and' 'but' 'for' 'when' 'which' 'o']
+2  ['this' 'the' 'your' 'his' 'thee' 'a' 'be' 'me' 'thy' 'my']
+3  ['of' 'my' 'is' '.' ',' 'and' '?' 'love' 'self' ':']
+4  ['what' 'when' 'so' 'do' 'you' 'that' ',' 'not' 'thou' 'i']]
